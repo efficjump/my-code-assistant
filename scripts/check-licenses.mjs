@@ -1,13 +1,18 @@
 import { spawnSync } from 'node:child_process'
 
-const packageManager = process.platform === 'win32' ? 'pnpm.cmd' : 'pnpm'
-const result = spawnSync(packageManager, ['licenses', 'list', '--prod', '--json'], {
-  encoding: 'utf8',
-  shell: false,
-  stdio: ['ignore', 'pipe', 'pipe'],
-})
+const windows = process.platform === 'win32'
+const licenseArguments = ['licenses', 'list', '--prod', '--json']
+const result = spawnSync(
+  windows ? `pnpm ${licenseArguments.join(' ')}` : 'pnpm',
+  windows ? [] : licenseArguments,
+  {
+    encoding: 'utf8',
+    shell: windows,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  },
+)
 
-if (result.status !== 0) {
+if (result.error || result.status !== 0) {
   process.stderr.write(result.stderr || 'Unable to inspect production dependency licenses.\n')
   process.exit(result.status ?? 1)
 }
