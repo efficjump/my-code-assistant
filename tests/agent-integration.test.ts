@@ -2138,7 +2138,7 @@ describe('AgentService integration boundaries', () => {
       theme: currentSettings.theme,
       maxToolIterations: 1,
     })
-    const canonicalCwd = join(environment.root, 'canonical-cwd')
+    const canonicalCwd = join(environment.workspace.getWorkspace()?.path as string, 'canonical-cwd')
     const secret = ['sk', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'].join('-')
     const execution = {
       preview: async (request: { argv: string[]; timeoutMs?: number }) => ({
