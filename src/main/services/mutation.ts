@@ -1243,7 +1243,7 @@ export class MutationService {
         .some(
           (segment) =>
             !segment ||
-            /[. ]$/.test(segment) ||
+            (segment !== '.' && /[. ]$/.test(segment)) ||
             segment.includes(':') ||
             WINDOWS_RESERVED_SEGMENT.test(segment),
         )

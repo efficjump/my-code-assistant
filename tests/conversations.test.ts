@@ -19,6 +19,7 @@ import {
 import { hostMessages } from '../src/main/services/host-messages'
 
 const temporaryDirectories: string[] = []
+const temporaryRepositories = new Set<ConversationRepository>()
 
 function temporaryRepository(now?: () => number): {
   repository: ConversationRepository
@@ -28,8 +29,10 @@ function temporaryRepository(now?: () => number): {
   const directory = mkdtempSync(join(tmpdir(), 'code-assistant-conversations-'))
   temporaryDirectories.push(directory)
   const databasePath = join(directory, 'history.sqlite3')
+  const repository = new ConversationRepository({ databasePath, now })
+  temporaryRepositories.add(repository)
   return {
-    repository: new ConversationRepository({ databasePath, now }),
+    repository,
     directory,
     databasePath,
   }
@@ -214,6 +217,8 @@ function downgradeRunTableToVersionFour(databasePath: string): void {
 }
 
 afterEach(() => {
+  for (const repository of temporaryRepositories) repository.close()
+  temporaryRepositories.clear()
   for (const directory of temporaryDirectories.splice(0)) {
     rmSync(directory, { recursive: true, force: true })
   }

@@ -2,14 +2,14 @@ import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import { lstatSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
 import { homedir, tmpdir } from 'node:os'
-import { basename, isAbsolute, join, resolve } from 'node:path'
+import { basename, isAbsolute, join, posix, resolve } from 'node:path'
 
 export const LOCAL_SIGNING_CONFIG_VERSION = 3
 export const LEGACY_LOCAL_SIGNING_CONFIG_VERSION = 1
 export const PREVIOUS_LOCAL_SIGNING_CONFIG_VERSION = 2
 export const CREDENTIAL_BROKER_PROTOCOL_VERSION = 2
 export const CREDENTIAL_BACKEND_METADATA_KEY = 'codeAssistantCredentialBackend'
-export const CREDENTIAL_BROKER_RESOURCE_PATH = join(
+export const CREDENTIAL_BROKER_RESOURCE_PATH = posix.join(
   'Contents',
   'Resources',
   'credential-broker',
@@ -331,8 +331,8 @@ export function localCredentialBrokerBuildConfiguration(baseConfiguration, crede
       extraResources: [
         ...existingExtraResources,
         {
-          from: resolve(credentialBroker.artifactPath),
-          to: join('credential-broker', 'credential-broker'),
+          from: posix.resolve(credentialBroker.artifactPath),
+          to: posix.join('credential-broker', 'credential-broker'),
         },
       ],
       mac: {
@@ -555,8 +555,8 @@ export function findMacAppBundles(metadata) {
 export function findRunningMacBundleProcesses(processListing, appPaths, executableName) {
   const executablePaths = new Map(
     appPaths.map((appPath) => [
-      resolve(appPath, 'Contents', 'MacOS', executableName),
-      resolve(appPath),
+      posix.resolve(appPath, 'Contents', 'MacOS', executableName),
+      posix.resolve(appPath),
     ]),
   )
   const running = []

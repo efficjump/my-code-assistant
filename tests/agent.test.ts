@@ -10,7 +10,7 @@ import {
   createAssistantDriverSession,
 } from '../src/main/runtime/assistant-driver'
 import { AssistantDriverRegistry } from '../src/main/runtime/assistant-driver-registry'
-import { AgentService } from '../src/main/services/agent'
+import { AgentService, redactWorkspacePathEvidence } from '../src/main/services/agent'
 import { ConversationRepository } from '../src/main/services/conversations'
 import { type EncryptionAdapter, SettingsStore } from '../src/main/services/settings'
 import { WorkspaceService } from '../src/main/services/workspace'
@@ -45,6 +45,18 @@ afterEach(async () => {
 })
 
 describe('AgentService', () => {
+  it('redacts JSON-escaped Windows workspace paths without depending on drive-letter casing', () => {
+    const workspacePath = ['C:', 'Users', 'Example', 'Project'].join('\\')
+    const escapedWorkspacePath = JSON.stringify(workspacePath).slice(1, -1)
+    const source = JSON.stringify(`${workspacePath.toUpperCase()}\\nested`)
+
+    const redacted = redactWorkspacePathEvidence(source, workspacePath)
+
+    expect(redacted).toContain('[workspace]')
+    expect(redacted).not.toContain(workspacePath.toUpperCase())
+    expect(redacted.toLowerCase()).not.toContain(escapedWorkspacePath.toLowerCase())
+  })
+
   it('reserves a Goal against new runs for the full mutation boundary', async () => {
     const settings = new SettingsStore({
       userDataPath: await temporaryDirectory(),

@@ -2714,28 +2714,39 @@ function redactSensitiveText(source: string): string {
     .replace(/Bearer\s+[^\s,;]+/gi, 'Bearer [REDACTED]')
 }
 
+function literalPattern(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
+
+export function redactWorkspacePathEvidence(source: string, workspacePath: string | null): string {
+  if (!workspacePath) return source
+  const aliases = new Set([
+    workspacePath,
+    JSON.stringify(workspacePath).slice(1, -1),
+    ...(workspacePath.startsWith('/private/')
+      ? [workspacePath.slice('/private'.length)]
+      : workspacePath.startsWith('/')
+        ? [`/private${workspacePath}`]
+        : []),
+  ])
+  let result = source
+  for (const alias of aliases) {
+    const flags = /^[A-Za-z]:[\\/]/u.test(alias) ? 'giu' : 'gu'
+    result = result.replace(new RegExp(literalPattern(alias), flags), '[workspace]')
+  }
+  return result
+}
+
 function boundedRunEvidenceText(
   source: string,
   workspacePath: string | null,
   maximum = RUN_REPORT_MAX_FACT_TEXT_CHARACTERS,
 ): { text: string; truncated: boolean } {
-  const workspaceAliases = workspacePath
-    ? new Set([
-        workspacePath,
-        ...(workspacePath.startsWith('/private/')
-          ? [workspacePath.slice('/private'.length)]
-          : workspacePath.startsWith('/')
-            ? [`/private${workspacePath}`]
-            : []),
-      ])
-    : new Set<string>()
-  let workspaceSafe = source
-  for (const alias of workspaceAliases) {
-    workspaceSafe = workspaceSafe.split(alias).join('[workspace]')
-  }
-  const normalized = redactSensitiveText(workspaceSafe)
+  const normalized = redactSensitiveText(redactWorkspacePathEvidence(source, workspacePath))
     .replace(/\/Users\/[^/\s]+/g, '[HOME]')
     .replace(/\/home\/[^/\s]+/g, '[HOME]')
+    .replace(/[A-Za-z]:\/Users\/[^/\s"']+/gi, '[HOME]')
+    .replace(/[A-Za-z]:\\{1,2}Users\\{1,2}[^\\\s"']+/gi, '[HOME]')
     .replace(/[\p{Cc}]+/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim()

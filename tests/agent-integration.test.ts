@@ -2191,7 +2191,9 @@ describe('AgentService integration boundaries', () => {
     expect(visibleText).toContain('/canonical/timeout')
     expect(visibleText).toContain('/canonical/spawn')
     expect(visibleText).toContain('actual-only')
-    expect(visibleText).toContain('[workspace]/canonical-cwd')
+    expect(visibleText).toContain('[workspace]')
+    expect(visibleText).not.toContain(environment.root)
+    expect(visibleText).not.toContain(JSON.stringify(environment.root).slice(1, -1))
     expect(visibleText).toContain('명령 실행 성공(exit 0)')
     expect(visibleText).toContain('명령 실행 실패 (exit 7)')
     expect(visibleText).toContain('명령 실행 시간 초과')
@@ -7640,7 +7642,7 @@ describe('AgentService integration boundaries', () => {
           'run_command',
           JSON.stringify({
             summary: '공동 합의된 실행 검증',
-            argv: ['/usr/bin/true'],
+            argv: [process.execPath, '-e', 'process.exit(0)'],
             cwd: null,
             timeoutMs: 5_000,
           }),

@@ -124,8 +124,8 @@ describe('StructuredProcessRunner', () => {
 
     expect(result.timedOut).toBe(true)
     expect(result.cancelled).toBe(false)
-    expect(result.exitCode).toBeNull()
-    expect(result.signal).toMatch(/^SIG/)
+    expect(result.exitCode).not.toBe(0)
+    expect(result.exitCode !== null || result.signal !== null).toBe(true)
   })
 
   it('force-terminates a descendant that ignores the graceful tree signal', async () => {
@@ -169,7 +169,8 @@ describe('StructuredProcessRunner', () => {
     const result = await pending
     expect(result.cancelled).toBe(true)
     expect(result.timedOut).toBe(false)
-    expect(result.signal).toMatch(/^SIG/)
+    expect(result.exitCode).not.toBe(0)
+    expect(result.exitCode !== null || result.signal !== null).toBe(true)
   })
 
   it('bounds collected and streamed output while recording actual byte count', async () => {
