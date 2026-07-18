@@ -1,0 +1,8 @@
+allowBuilds:
+  '@swc/core': true
+  electron: true
+  electron-winstaller: true
+  esbuild: true
+minimumReleaseAgeExclude:
+  - lucide-react@1.24.0
+  - openai@6.46.0

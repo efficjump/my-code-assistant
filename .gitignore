@@ -1,0 +1,25 @@
+node_modules/
+out/
+dist/
+release/
+coverage/
+test-results/
+playwright-report/
+*.log
+*.tsbuildinfo
+.DS_Store
+.idea/
+.env
+.env.*
+!.env.example
+
+# Signing credentials must live in Keychain or an external secret store.
+*.cer
+*.crt
+*.key
+*.keychain
+*.keychain-db
+*.p12
+*.pem
+*.pfx
+.local-signing/
