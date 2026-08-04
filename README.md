@@ -1,3 +1,5 @@
+**English** | [한국어](README.ko.md)
+
 <div align="center">
   <img src="build/icon.png" width="112" height="112" alt="Code Assistant application icon">
 
